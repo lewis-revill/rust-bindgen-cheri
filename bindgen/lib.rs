@@ -654,10 +654,14 @@ pub(crate) const HOST_TARGET: &str =
 // Some architecture triplets are different between rust and libclang, see #1211
 // and duplicates.
 fn rust_to_clang_target(rust_target: &str) -> String {
+    println!("{}", rust_target);
     if rust_target.starts_with("aarch64-apple-") {
         let mut clang_target = "arm64-apple-".to_owned();
         clang_target
             .push_str(rust_target.strip_prefix("aarch64-apple-").unwrap());
+        return clang_target;
+    } else if rust_target == "morello-unknown-linux-purecap" {
+        let mut clang_target = "aarch64-unknown-linux-musl_purecap".to_owned();
         return clang_target;
     } else if rust_target.starts_with("riscv64gc-") {
         let mut clang_target = "riscv64-".to_owned();
@@ -722,6 +726,8 @@ impl Bindings {
 
         let (effective_target, explicit_target) =
             find_effective_target(&options.clang_args);
+
+        println!("{} {}", effective_target, explicit_target);
 
         let is_host_build =
             rust_to_clang_target(HOST_TARGET) == effective_target;
@@ -850,6 +856,7 @@ impl Bindings {
         }
 
         debug!("Fixed-up options: {:?}", options);
+        println!("{:?}", options);
 
         let time_phases = options.time_phases;
         let mut context = BindgenContext::new(options, &input_unsaved_files);
